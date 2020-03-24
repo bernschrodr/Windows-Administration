@@ -1,0 +1,50 @@
+{
+  "server1": {
+    "name": "s1",
+    "local_ip": "10.0.0.1",
+    "gateway": "10.10.10.10",
+    "dns": "10.10.10.10",
+    "interface_name": "Ethernet",
+    "mask_length": 8,
+    "scope": {
+      "name": "lab2Scope",
+      "start_range": "10.0.0.100",
+      "end_range": "10.0.0.200",
+      "mask": "255.0.0.0",
+      "id": "10.0.0.0",
+      "domain": "SVD.loc",
+      "exclude": [
+        {
+          "start_range": "10.0.0.195",
+          "end_range": "10.0.0.200"
+        }
+      ],
+      "reservation": [
+        {
+          "ip": "10.0.0.199",
+          "mac": "00-01-02-03-04-05",
+          "description": "Reservation for lab2"
+        }
+      ]
+    },
+    "policy": {
+      "name": "lab2",
+      "macMask": "AA0102*"
+    },
+    "failover": {
+      "name": "lab2-Failover",
+      "reserve_percent": 35,
+      "lead_time": "00:30:00",
+      "switch_interval": "00:01:00",
+      "secret": "123"
+    }
+  },
+  "server2": {
+    "name": "s2",
+    "local_ip": "10.0.0.2",
+    "gateway": "10.10.10.10",
+    "dns": "10.10.10.10",
+    "interface_name": "Ethernet",
+    "mask_length": 8
+  }
+}

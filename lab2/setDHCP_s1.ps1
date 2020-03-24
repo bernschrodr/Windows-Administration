@@ -1,31 +1,46 @@
-$computerName = "s1"
-Rename-Computer -NewName $computerName
-Restart-Computer -Wait
+#Читаем Конфиг
+$configFile = Get-Content "config.json" | ConvertFrom-Json
 
-#Настройка параметров адаптера
-New-NetIPAddress -IPAddress 10.0.0.1 -InterfaceAlias "Ethernet" -DefaultGateway 10.10.10.10 -AddressFamily IPv4 -PrefixLength 8
-Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses 10.10.10.10
+#Запускаем с другой машины находящейся в сети с s1 и s2
+Invoke-Command -ComputerName "s2" -ScriptBlock { setup_s2 }
+Invoke-Command -ComputerName "s1" -ScriptBlock { setup_s1 }
 
-#Отключение ipv6
-Disable-NetAdapterBinding -Name "Ethernet" -ComponentID ms_tcpip6
+function setup_s2($config) {
+  Rename-Computer -NewName $config.name
+  Restart-Computer -Wait
+  
+  #Настройка параметров адаптера
+  New-NetIPAddress -IPAddress $config.local_ip -InterfaceAlias $config.interface_name -DefaultGateway $config.gateway -AddressFamily IPv4 -PrefixLength $config.mask_length
+  Set-DnsClientServerAddress -InterfaceAlias $config.interface_name -ServerAddresses $config.dns
+  
+  #Отключение ipv6
+  Disable-NetAdapterBinding -Name $config.interface_name -ComponentID ms_tcpip6
+  
+  #Установка DHCP роли для сервера
+  Install-WindowsFeature DHCP -IncludeManagementTools
+  netsh dhcp add securitygroups
+  Restart-Service dhcpserver
+  Set-DhcpServerv4DnsSetting -ComputerName $config.name -DynamicUpdates "Always" -DeleteDnsRRonLeaseExpiry $True
 
-#Установка DHCP роли для сервера
-Install-WindowsFeature DHCP -IncludeManagementTools
-netsh dhcp add securitygroups
-Restart-Service dhcpserver
-Set-DhcpServerv4DnsSetting -ComputerName $computerName  -DynamicUpdates "Always" -DeleteDnsRRonLeaseExpiry $True
+}
 
-#Настройка области
-Add-DhcpServerv4Scope -name "lab2Scope" -StartRange 10.0.0.100 -EndRange 10.0.0.200 -SubnetMask 255.0.0.0 -State Active    
-Add-DhcpServerv4ExclusionRange -ScopeID 10.0.0.100 -StartRange 10.0.0.195 -EndRange 10.0.0.200
-Set-DhcpServerv4OptionValue -OptionID 3 -Value 10.0.0.1 -ScopeID 10.0.0.100 -ComputerName $computerName
-Set-DhcpServerv4OptionValue  -DnsDomain "SVD.loc" -ComputerName $computerName -DnsServer 10.10.10.10
+function setup_s1 {
+  #Начало для обоих серверов одинаковое, поэтому запускаем настройку с параметрами для s1
+  setup_s2($configFile.server1)
+  $config = $configFile.server1
 
-#Добавление Резервации
-Add-DhcpServerv4Reservation -ScopeId 10.0.0.100 -IPAddress 10.0.0.199 -ClientId "00-01-02-03-04-05" -Description "Reservation for lab2"
+  #Настройка области
+  Add-DhcpServerv4Scope -name $config.scope.name -StartRange $config.scope.start_range -EndRange $config.scope.end_range -SubnetMask $config.scope.mask -State Active
+  Add-DhcpServerv4ExclusionRange -ScopeID $config.scope.id -StartRange $config.scope.start_range -EndRange $config.scope.end_range
+  Set-DhcpServerv4OptionValue -Value $config.local_ip -ScopeID $config.scope.id -ComputerName $config.name
+  Set-DhcpServerv4OptionValue  -DnsDomain $config.scope.domain -ComputerName $config.name -DnsServer $config.scope.dns
 
-#Добавление политики
-Add-DhcpServerv4Policy -Name "lab2" -MacAddress EQ, AA0102*
+  #Добавление Резервации
+  Add-DhcpServerv4Reservation -ScopeId $config.scope.id -IPAddress $config.scope.reservation[0].ip -ClientId $config.scope.reservation[0].mac -Description $config.scope.reservation[0].description
 
-#Настройка отработки отказа
-Add-DhcpServerv4Failover -ComputerName $computerName -Name "lab3-Failover" -PartnerServer "10.0.0.2" -ServerRole Standby -ScopeId 10.10.10.100 -ReservePercent 35 -MaxClientLeadTime 00:30:00 -AutoStateTransition $True -StateSwitchInterval 00:01:00 -SharedSecret "123"
+  #Добавление политики
+  Add-DhcpServerv4Policy -Name $config.policy[0].name -ScopeId $config.scope.id -Condition OR -MacAddress EQ, $config.policy.macMask
+
+  #Настройка отработки отказа
+  Add-DhcpServerv4Failover -ComputerName $config.name -Name $config.failover.name -PartnerServer $configFile.server2.name -ServerRole Standby -ScopeId $config.scope.id -ReservePercent $config.failover.reserve_percent -MaxClientLeadTime $config.failover.lead_time -AutoStateTransition $True -StateSwitchInterval $config.failover.switch_interval -SharedSecret $config.failover.secret
+}
