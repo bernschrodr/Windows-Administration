@@ -30,9 +30,9 @@ function setup_s1($config) {
 
   #Настройка области
   Add-DhcpServerv4Scope -name $config.scope.name -StartRange $config.scope.start_range -EndRange $config.scope.end_range -SubnetMask $config.scope.mask -State Active
-  Add-DhcpServerv4ExclusionRange -ScopeID $config.scope.id -StartRange $config.scope.start_range -EndRange $config.scope.end_range
-  Set-DhcpServerv4OptionValue -Value $config.local_ip -ScopeID $config.scope.id -ComputerName $config.name
-  Set-DhcpServerv4OptionValue  -DnsDomain $config.scope.domain -ComputerName $config.name -DnsServer $config.scope.dns
+  Add-DhcpServerv4ExclusionRange -ScopeID $config.scope.id -StartRange $config.scope.exclude[0].start_range -EndRange $config.scope.exclude[0].end_range
+  Set-DhcpServerv4OptionValue -OptionId 3 -Value $config.local_ip -ScopeID $config.scope.id -ComputerName $config.name
+  Set-DhcpServerv4OptionValue  -DnsDomain $config.scope.domain -ComputerName $config.name -DnsServer $config.dns
 
   #Добавление Резервации
   Add-DhcpServerv4Reservation -ScopeId $config.scope.id -IPAddress $config.scope.reservation[0].ip -ClientId $config.scope.reservation[0].mac -Description $config.scope.reservation[0].description
@@ -41,5 +41,5 @@ function setup_s1($config) {
   Add-DhcpServerv4Policy -Name $config.policy[0].name -ScopeId $config.scope.id -Condition OR -MacAddress EQ, $config.policy.macMask
 
   #Настройка отработки отказа
-  Add-DhcpServerv4Failover -ComputerName $config.name -Name $config.failover.name -PartnerServer $configFile.server2.name -ServerRole Standby -ScopeId $config.scope.id -ReservePercent $config.failover.reserve_percent -MaxClientLeadTime $config.failover.lead_time -AutoStateTransition $True -StateSwitchInterval $config.failover.switch_interval -SharedSecret $config.failover.secret
+  Add-DhcpServerv4Failover -ComputerName $config.name -Name $config.failover.name -PartnerServer $configFile.server2.local_ip -ServerRole Standby -ScopeId $config.scope.id -ReservePercent $config.failover.reserve_percent -MaxClientLeadTime $config.failover.lead_time -AutoStateTransition $True -StateSwitchInterval $config.failover.switch_interval -SharedSecret $config.failover.secret
 }
