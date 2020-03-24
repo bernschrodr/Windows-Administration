@@ -2,8 +2,8 @@
 $configFile = Get-Content "config.json" | ConvertFrom-Json
 
 #Запускаем с другой машины находящейся в сети с s1 и s2
-Invoke-Command -ComputerName "s2" -ScriptBlock { setup_s2 }
-Invoke-Command -ComputerName "s1" -ScriptBlock { setup_s1 }
+Invoke-Command -ComputerName "s2" -ScriptBlock { setup_s2($configFile.server2) }
+Invoke-Command -ComputerName "s1" -ScriptBlock { setup_s1($configFile.server1) }
 
 function setup_s2($config) {
   Rename-Computer -NewName $config.name
@@ -24,10 +24,9 @@ function setup_s2($config) {
 
 }
 
-function setup_s1 {
+function setup_s1($config) {
   #Начало для обоих серверов одинаковое, поэтому запускаем настройку с параметрами для s1
-  setup_s2($configFile.server1)
-  $config = $configFile.server1
+  setup_s2($config)
 
   #Настройка области
   Add-DhcpServerv4Scope -name $config.scope.name -StartRange $config.scope.start_range -EndRange $config.scope.end_range -SubnetMask $config.scope.mask -State Active
