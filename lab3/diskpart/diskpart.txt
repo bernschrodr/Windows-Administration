@@ -1,0 +1,10 @@
+Select Disk 1
+Convert Dynamic
+Select Disk 2
+Convert Dynamic
+Select Disk 3
+Convert Dynamic
+Select Disk 4
+Convert Dynamic
+Select Disk 1
+create volume raid disk=1,2,3,4

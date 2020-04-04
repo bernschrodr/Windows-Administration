@@ -1,0 +1,2 @@
+Select volume 0
+format quick fs=ntfs label="RAID 5 Vol"
