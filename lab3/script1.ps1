@@ -14,3 +14,9 @@ switch ($answer) {
         Exit}
     Default { Write-Output 'Wrong input' }
 }
+
+Get-Disk | ForEach-Object{
+    if(!$_.BootFromDisk){
+        echo $_
+    }
+}

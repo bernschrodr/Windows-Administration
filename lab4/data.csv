@@ -1,0 +1,4 @@
+Fio,Post,Department,Email,Phone,Login,Password,Groups,HomeDirectory,ProfilePath,Container
+Test Profile One,worker,TestDepart1,worker1@gmail.com,192391249,test1,123456,testGroup2,C:/UsersHome,C:/UsersHome/test1,"CN=script,DN=lab4,DN=com"
+Test Profile Two,worker,TestDepart2,worker2@gmail.com,192391214,test2,123456,testGroup3,C:/UsersHome,C:/UsersHome/test2,"CN=script,DN=lab4,DN=com"
+Test Profile Three,worker,TestDepart2,worker3@gmail.com,192392214,test3,123456,testGroup3,C:/UsersHome,C:/UsersHome/test3,"CN=script,DN=lab4,DN=com"
