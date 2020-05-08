@@ -1,4 +1,6 @@
 Fio,Post,Department,Email,Phone,Login,Password,Groups,HomeDirectory,ProfilePath,Container
-Test Profile One,worker,TestDepart1,worker1@gmail.com,192391249,test1,123456,testGroup2,C:/UsersHome,C:/UsersHome/test1,"CN=script,DN=lab4,DN=com"
-Test Profile Two,worker,TestDepart2,worker2@gmail.com,192391214,test2,123456,testGroup3,C:/UsersHome,C:/UsersHome/test2,"CN=script,DN=lab4,DN=com"
-Test Profile Three,worker,TestDepart2,worker3@gmail.com,192392214,test3,123456,testGroup3,C:/UsersHome,C:/UsersHome/test3,"CN=script,DN=lab4,DN=com"
+Un TO Del1,worker,TestDepart1,worker1@gmail.com,192391249,del1,123456,testGroup2,C:/UsersHome,C:/UsersHome/del1,"CN=unit-to-delete"
+Un TO Del2,worker,TestDepart1,worker1@gmail.com,192391249,del2,123456,testGroup2,C:/UsersHome,C:/UsersHome/del2,"CN=unit-to-delete"
+Un TO Del3,worker,TestDepart1,worker1@gmail.com,192391249,del3,123456,testGroup2,C:/UsersHome,C:/UsersHome/del3,"CN=unit-to-delete"
+Un TO Del4,worker,TestDepart1,worker1@gmail.com,192391249,del4,123456,testGroup2,C:/UsersHome,C:/UsersHome/del4,"CN=unit-to-delete"
+Un TO Del5,worker,TestDepart1,worker1@gmail.com,192391249,del5,123456,testGroup2,C:/UsersHome,C:/UsersHome/del5,"CN=unit-to-delete"

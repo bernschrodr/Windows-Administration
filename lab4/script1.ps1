@@ -43,22 +43,24 @@ function createFromCsv {
       } }
 
     if(!(Get-ADObject -Filter 'DistinguishedName -eq $container')){
-        if($container.contains(',')){
-          $cont = $container.subString(3,$container.indexof(','))
-        }else{
-          $cont = $container.subString(3,$container.length - 3)
-        }
+        if($container.contains("CN=")){
+          $pos = $container.indexof('CN=')
+          $cont = $container.subString($pos, $container.length - $pos)
+          $pos = $container.IndexOf(',')
+          $cont = $cont.subString(3)
+        
         echo $cont
         New-ADObject -Name $cont  -Type "container" -Path $domain
         $createdContainers += $cont
-    }
+    }}
 
+    $container += ',' + $domain
 
     Try {
       New-ADUser -Name $user.FIO `
         -GivenName $firstName `
         -Surname $lastName `
-        -SamAccountName  $userName
+        -SamAccountName  $userName `
         -Initials $initials `
         -Department $department `
         -EmailAddress $email `
@@ -80,7 +82,7 @@ function createFromCsv {
         New-Item -Path $path -ItemType Directory
         New-SMBShare -Name $userName -Path $path -FullAccess "lab4.com\$username"
         $acl = Get-Acl $path
-        $accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule("$userName","FullContol","Allow")
+        $accessRule = New-Object System.Security.AccessControl.FileSystemAccessRule($userName,"FullControl","Allow")
         $acl.SetAccessRule($accessRule)
         $acl | Set-Acl $path
       }
